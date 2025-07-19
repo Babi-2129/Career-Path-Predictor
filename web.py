@@ -2,23 +2,47 @@ import streamlit as st
 import pandas as pd
 import joblib
 import os
+import requests # NEW: Import requests library for downloading
 
 # Define the base directory for your project
 current_dir = os.path.dirname(__file__)
 model_dir = os.path.join(current_dir, '..', 'Model Training')
 
-# Construct the full paths to the model and encoder files
-model_path = os.path.join(model_dir, 'best_career_path_predictor_model.pkl')
+# Construct the full path to the label encoder file (it's on GitHub now)
 label_encoder_path = os.path.join(model_dir, 'field_label_encoder.pkl')
+
+# --- NEW: Your Model's Public Google Drive Download URL ---
+# IMPORTANT: This is the DIRECT download link.
+# Converted from: https://drive.google.com/file/d/1TCSOmaOnfcBjDFYf_57GQK0-Y7EmtvDC/view?usp=drive_link
+MODEL_DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=1TCSOmaOnfcBjDFYf_57GQK0-Y7EmtvDC"
+LOCAL_MODEL_FILENAME = "best_career_path_predictor_model.pkl" # This is where the downloaded model will be saved
+
+# NEW: Function to download model from URL
+@st.cache_resource # Cache the model so it's only downloaded once across reruns
+def load_model_from_url(url, local_filename):
+    st.info(f"Downloading model...") # Removed URL from message for conciseness
+    try:
+        response = requests.get(url, stream=True)
+        response.raise_for_status() # Raise an exception for bad status codes (e.g., 404)
+        with open(local_filename, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        st.success("Model downloaded successfully!")
+        return joblib.load(local_filename)
+    except Exception as e:
+        st.error(f"Failed to download or load model: {e}")
+        st.stop()
+
 
 # Load your trained model and label encoder
 try:
-    model = joblib.load(model_path)
-    label_encoder = joblib.load(label_encoder_path)
+    model = load_model_from_url(MODEL_DOWNLOAD_URL, LOCAL_MODEL_FILENAME) # Load model from URL
+    label_encoder = joblib.load(label_encoder_path) # Load label encoder locally from GitHub
 except FileNotFoundError:
-    st.error(f"Error: Model or label encoder files not found at expected paths.")
-    st.error(f"Looking for model at: {model_path}")
-    st.error(f"Looking for label encoder at: {label_encoder_path}")
+    st.error(f"Error: Label encoder file not found at: {label_encoder_path}. Please ensure it's in Model Training folder on GitHub.")
+    st.stop()
+except Exception as e:
+    st.error(f"An unexpected error occurred during model/encoder loading: {e}")
     st.stop()
 
 # --- Streamlit Page Configuration ---
@@ -31,7 +55,7 @@ st.markdown("""
         background-color: #f0f2f6; /* Light gray background */
         color: #333333; /* Default text color */
     }
-            /* Profile Image Styling */
+    /* Profile Image Styling */
     .profile-img {
         width: 260px; /* Big size */
         height: 260px; /* Big size */
@@ -94,15 +118,12 @@ st.markdown("""
         margin-top: 2em;
     }
     /* --- CSS FOR NUMBERS (targeting more broadly) --- */
-    /* Target number input values (text inside the input box) */
-    .stNumberInput input {
+    input[data-testid="stNumberInput-StyledInput"] {
         color: #333333 !important;
     }
-    /* Target slider current value display */
     .stSlider .st-bh span, .stSlider .st-bd span {
         color: #333333 !important; /* Force dark gray */
     }
-    /* General text within Streamlit containers that might display numbers */
     .stApp > header + div > div > div > div > div > div > div > div > span {
         color: #333333 !important;
     }
@@ -167,7 +188,6 @@ st.markdown("### <span style='color:#34495e;'>Discover Your Ideal Career Field B
 st.write("Please provide your academic and skill details below. Most inputs are on a scale of 0-10 unless specified.")
 
 # --- Define Expected Features (from your X dataframe) ---
-# IMPORTANT: This list MUST be defined BEFORE it is used in any function or block
 feature_columns = [
     'GPA', 'Extracurricular_Activities', 'Internships', 'Projects',
     'Leadership_Positions', 'Field_Specific_Courses', 'Research_Experience',
@@ -242,14 +262,6 @@ with tab1:
             'Industry_Certifications': industry_certifications
         }
 
-        # --- REMOVE DEBUGGING LINES FROM HERE ---
-        # st.write("DEBUG: input_data_dict content:", input_data_dict)
-        # st.write("DEBUG: Keys in input_data_dict:", list(input_data_dict.keys()))
-        # st.write("DEBUG: Number of keys in input_data_dict:", len(input_data_dict))
-        # st.write("DEBUG: feature_columns content:", feature_columns)
-        # st.write("DEBUG: Number of feature_columns:", len(feature_columns))
-        # --- END DEBUGGING LINES ---
-
         input_df = pd.DataFrame([input_data_dict], columns=feature_columns)
 
         predicted_field = model.predict(input_df)[0]
@@ -258,7 +270,7 @@ with tab1:
         st.success(f"## Your Predicted Career Field: **{predicted_field}**")
         st.info("💡 Remember, this is a prediction based on your input and the model's training. It's a guide to explore further!")
 
-    
+     
     st.markdown("---") # Another visual separator before the button
     # Direct link button
     st.caption("Developed as part of the Career Path Predictor Project")
@@ -285,4 +297,4 @@ with tab2:
         <p>My Portfolio: <a href="https://babi-2129.github.io/portfolio-website/  " target="_blank">View Me 🥰 </a></p>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown("<br><br>", unsafe_allow_html=True) # Add some space
+    st.markdown("<br><br>", unsafe_allow_html=True)
