@@ -1,5 +1,7 @@
 # 🎓 Career Path Predictor – For High School Students
 
+# Link:- https://career-path-predictor-by-babi-pepakayala.streamlit.app/
+
 ## 🎯 Project Overview  
 This project aims to help high school students discover suitable career fields based on their academic performance, skills, and experiences. A user-friendly web application, built with Streamlit, takes various inputs from the student and utilizes a trained Machine Learning model to predict the most aligned career field. The application is designed for free deployment, making it accessible to anyone.
 
@@ -122,5 +124,5 @@ Visit [http://localhost:8501](http://localhost:8501) in your browser.
 ## 👨‍💻 Author  
 **Babi Pepakayala**  
 📧 Email: babipepakayala162129@gmail.com  
-🔗 LinkedIn: [Babi Pepakayala](https://www.linkedin.com/in/YOUR_LINK_HERE)  
-🌐 Portfolio: [View Me 🥰](https://YOUR_PORTFOLIO_LINK_HERE)
+🔗 LinkedIn: [Babi Pepakayala](https://www.linkedin.com/in/babi-pepakayala/) 
+🌐 Portfolio: [View Me 🥰](https://babi-2129.github.io/portfolio-website/)
