@@ -2,47 +2,43 @@ import streamlit as st
 import pandas as pd
 import joblib
 import os
-import requests # NEW: Import requests library for downloading
+import requests # Make sure this is imported at the top
 
-# Define the base directory for your project
+# Define the base directory for your project (no longer directly using Model Training path for files)
 current_dir = os.path.dirname(__file__)
-model_dir = os.path.join(current_dir, '..', 'Model Training')
 
-# Construct the full path to the label encoder file (it's on GitHub now)
-label_encoder_path = os.path.join(model_dir, '../Model Training/field_label_encoder.pkl')
+# --- IMPORTANT: Your Model's Public Google Drive Download URL ---
+MODEL_DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=1TCSOmaOnfcBjDFYf_57GQK0-Y7EmtvDC" # Your already provided model link
+LOCAL_MODEL_FILENAME = "best_career_path_predictor_model.pkl"
 
-# --- NEW: Your Model's Public Google Drive Download URL ---
-# IMPORTANT: This is the DIRECT download link.
-# Converted from: https://drive.google.com/file/d/1TCSOmaOnfcBjDFYf_57GQK0-Y7EmtvDC/view?usp=drive_link
-MODEL_DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=1TCSOmaOnfcBjDFYf_57GQK0-Y7EmtvDC"
-LOCAL_MODEL_FILENAME = "best_career_path_predictor_model.pkl" # This is where the downloaded model will be saved
+# --- NEW: Your Label Encoder's Public Google Drive Download URL ---
+# Converted from: https://drive.google.com/file/d/1aLzOU9YDvheipaV8gQYMdCn5P5SRZScg/view?usp=sharing
+LABEL_ENCODER_DOWNLOAD_URL = "https://drive.google.com/uc?export=download&id=1aLzOU9YDvheipaV8gQYMdCn5P5SRZScg"
+LOCAL_LABEL_ENCODER_FILENAME = "field_label_encoder.pkl"
 
-# NEW: Function to download model from URL
-@st.cache_resource # Cache the model so it's only downloaded once across reruns
-def load_model_from_url(url, local_filename):
-    st.info(f"Downloading model...") # Removed URL from message for conciseness
+# Function to download and load a file
+@st.cache_resource # Cache both so they are only downloaded once
+def download_and_load_file(url, local_filename):
+    st.info(f"Downloading {local_filename}...") # Removed URL from message for conciseness
     try:
         response = requests.get(url, stream=True)
         response.raise_for_status() # Raise an exception for bad status codes (e.g., 404)
         with open(local_filename, 'wb') as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
-        st.success("Model downloaded successfully!")
+        st.success(f"{local_filename} downloaded successfully!")
         return joblib.load(local_filename)
     except Exception as e:
-        st.error(f"Failed to download or load model: {e}")
+        st.error(f"Failed to download or load {local_filename}: {e}")
         st.stop()
 
 
-# Load your trained model and label encoder
+# Load your trained model and label encoder from URLs
 try:
-    model = load_model_from_url(MODEL_DOWNLOAD_URL, LOCAL_MODEL_FILENAME) # Load model from URL
-    label_encoder = joblib.load(label_encoder_path) # Load label encoder locally from GitHub
-except FileNotFoundError:
-    st.error(f"Error: Label encoder file not found at: {label_encoder_path}. Please ensure it's in Model Training folder on GitHub.")
-    st.stop()
+    model = download_and_load_file(MODEL_DOWNLOAD_URL, LOCAL_MODEL_FILENAME)
+    label_encoder = download_and_load_file(LABEL_ENCODER_DOWNLOAD_URL, LOCAL_LABEL_ENCODER_FILENAME)
 except Exception as e:
-    st.error(f"An unexpected error occurred during model/encoder loading: {e}")
+    st.error(f"An error occurred during initial setup: {e}")
     st.stop()
 
 # --- Streamlit Page Configuration ---
