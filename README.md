@@ -125,5 +125,4 @@ Visit [http://localhost:8501](http://localhost:8501) in your browser.
 **Babi Pepakayala**  
 📧 Email: babipepakayala162129@gmail.com  
 🔗 LinkedIn: [Babi Pepakayala](https://www.linkedin.com/in/babi-pepakayala/)
-
 🌐 Portfolio: [View Me 🥰](https://babi-2129.github.io/portfolio-website/)
