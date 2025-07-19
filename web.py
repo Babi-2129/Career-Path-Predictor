@@ -9,7 +9,7 @@ current_dir = os.path.dirname(__file__)
 model_dir = os.path.join(current_dir, '..', 'Model Training')
 
 # Construct the full path to the label encoder file (it's on GitHub now)
-label_encoder_path = os.path.join(model_dir, 'field_label_encoder.pkl')
+label_encoder_path = os.path.join(model_dir, '../Model Training/field_label_encoder.pkl')
 
 # --- NEW: Your Model's Public Google Drive Download URL ---
 # IMPORTANT: This is the DIRECT download link.
